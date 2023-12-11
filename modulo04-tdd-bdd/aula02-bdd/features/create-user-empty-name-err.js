@@ -15,7 +15,7 @@ BeforeStep(function() {
   _testServerAddress = this.testServerAddress
 })
 
-When('I create a young user with the following details:', async function(dataTable) {
+When('I create a new user with the following \\(empty name) details:', async function(dataTable) {
   const [data] = dataTable.hashes()
   const response = await createUser(data)
   _context.responseData = {
@@ -24,7 +24,7 @@ When('I create a young user with the following details:', async function(dataTab
   }
 })
 
-Then('I should receive an error message that the user must be at least 18 years old', async function() {
+Then('I should receive an error message that the name cannot be empty', async function() {
   assert.strictEqual(_context.responseData.status, 400)
-  assert.strictEqual(_context.responseData.body.message, 'User must be 18yo or older')
+  assert.strictEqual(_context.responseData.body.message, 'Should contain valid name')
 })

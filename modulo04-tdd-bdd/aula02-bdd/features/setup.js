@@ -21,14 +21,16 @@ AfterAll(done => {''
 
 Given('I have a running server', async function () {
   // se o servidor já estiver rodando, usa ele!
-  if (_testServer) return
+  if (_testServer) {
+    this.testServerAddress = `http://localhost:${_testServer.address().port}`
+    return
+  }
 
   _testServer = server.listen()
 
   await waitForServerStatus(_testServer)
 
-  const serverInfo = _testServer.address()
-  this.testServerAddress = `http://localhost:${serverInfo.port}`
+  this.testServerAddress = `http://localhost:${_testServer.address().port}`
 })
 
 Given('The current date is {string}', async function (date) {

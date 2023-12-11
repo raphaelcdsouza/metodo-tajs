@@ -5,6 +5,13 @@ import { randomUUID } from 'node:crypto'
 const usersDb = []
 
 function getUserCategory(birthDay) {
+  const birthDate = new Date(birthDay)
+  const now = new Date()
+
+  if (birthDate > now) {
+    throw new Error('Invalid birth date')
+  }
+
   const age = new Date().getFullYear() - new Date(birthDay).getFullYear()
   if (age < 18) {
     throw new Error('User must be 18yo or older')
@@ -14,13 +21,22 @@ function getUserCategory(birthDay) {
     return 'young-adult'
   }
 
-  return ''
+  if (age > 25 && age <= 50) {
+    return 'adult'
+  }
+
+  return 'senior'
 }
 
 const server = createServer(async (request, response) => {
   try {    
     if (request.url === '/users' && request.method === 'POST') {
       const user = JSON.parse(await once(request, 'data'))
+
+      if (!user.name) {
+        throw new Error('Should contain valid name')
+      }
+
       const updatedUser = {
         ...user,
         id: randomUUID(),
@@ -44,7 +60,7 @@ const server = createServer(async (request, response) => {
       return
     }
   } catch (error) {
-    if (error.message.includes('18yo')) {
+    if (error.message.includes('18yo') || error.message.includes('valid name') || error.message.includes('birth date')) {
       response.writeHead(400, {
         'Content-Type': 'application/json'
       })
@@ -54,9 +70,13 @@ const server = createServer(async (request, response) => {
       return
     }
 
-    response.end('deu ruim!!')
+    response.writeHead(500, {
+      'Content-Type': 'application/json'
+    })
+    response.end(JSON.stringify({
+      message: 'deu ruim'
+    }))
   }
-  response.end('hello world')
 })
 
 export { server }
